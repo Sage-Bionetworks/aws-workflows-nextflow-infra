@@ -528,14 +528,14 @@ class TowerWorkspace:
                 assert cred["deleted"] is None
                 return cred["id"]
         # Otherwise, create a new credentials entry for the project
-        secret_arn = self.stack["TowerRoleArn"]
-        credentials = self.org.aws.get_secret_value(secret_arn)
+        # secret_arn = self.stack["TowerRoleArn"]
+        # credentials = self.org.aws.get_secret_value(secret_arn)
         data = {
             "credentials": {
                 "name": self.stack_name,
                 "provider": "aws",
                 "keys": {
-                    "accessKey": credentials["aws_access_key_id"],
+                    # "accessKey": credentials["aws_access_key_id"],
                     "assumeRoleArn": self.stack["TowerRoleArn"],
                 },
                 "description": f"Credentials for {self.stack_name}",
