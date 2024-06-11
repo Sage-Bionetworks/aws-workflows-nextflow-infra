@@ -173,6 +173,11 @@ Resources:
               AWS:
                 - 'Fn::ImportValue': !Sub ${AWS::Region}-nextflow-ecs-service-shared-EcsServiceRoleArn
             Action: sts:AssumeRole
+  TowerRoleProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref TowerRole
 
   TowerForgeBatchHeadJobPolicy:
     Type: AWS::IAM::Policy
