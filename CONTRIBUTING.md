@@ -127,6 +127,13 @@ The following secrets were created in all AWS accounts (including `strides-ampad
 - `nextflow/ghcr_service_acct`: The GHCR service account credentials for the Wave service
 - `nextflow/quayio_service_acct`: The Quay.io service account credentials for the Wave service
 
+## Deployment Testing
+
+After a new deployment has successfully completed, it is important to ensure things are working as expected by doing the following:
+
+1. Launch a simple workflow such as `nextflow-io/hello` from the UI using both `spot` and `on-demand` compute environments.
+1. Run the `demo.py` [script](https://github.com/Sage-Bionetworks-Workflows/py-orca/blob/main/demo.py) from the `py-orca` repository. Make sure that your connection URI environment variable points to the correct URL and workspace. This will check that the API is working as expected and that individual workspaces are able to access their associated S3 buckets.
+
 ## Additional Notes
 
 - The CIDR ranges of IP addresses specifies in the VPC configurations were added to the [Sage VPN](https://sagebionetworks.jira.com/wiki/spaces/IT/pages/352976898/Sage+VPN) table.

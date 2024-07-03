@@ -83,6 +83,15 @@ Parameters:
     Type: String
     Description: Redis container docker image, e.g. 'redis:5.0.8'
 {%- endif %}
+  MigrateDBContainerName:
+    Type: String
+    Description: (Optional) Name of the migrate-db container
+    Default: migrate-db
+  MigrateDBContainerImage:
+    Type: String
+    Description: >
+      (Optional) migrate-db container docker image,
+      e.g. 'cr.seqera.io/private/nf-tower-enterprise/migrate-db:v23.4.3'
   CronContainerName:
     Type: String
     Description: (Optional) Name of the cron container
@@ -91,7 +100,7 @@ Parameters:
     Type: String
     Description: >
       (Optional) Cron container docker image,
-      e.g. '195996028523.dkr.ecr.eu-west-1.amazonaws.com/nf-tower-enterprise/backend:v21.06.0'
+      e.g. 'cr.seqera.io/private/nf-tower-enterprise/backend:v21.06.0'
   FrontendContainerName:
     Type: String
     Description: (Optional) Name of the container that runs the tower ui
@@ -100,7 +109,7 @@ Parameters:
     Type: String
     Description: >
       Frontend container docker image,
-      e.g. '195996028523.dkr.ecr.eu-west-1.amazonaws.com/nf-tower-enterprise/frontend:v21.06.0'
+      e.g. 'cr.seqera.io/private/nf-tower-enterprise/frontend:v21.06.0'
   FrontendContainerPort:
     Type: Number
     Description: (Optional) Port to open in frontend container
@@ -117,7 +126,7 @@ Parameters:
     Type: String
     Description: >
       Backend container docker image,
-      e.g. '195996028523.dkr.ecr.eu-west-1.amazonaws.com/nf-tower-enterprise/backend:v21.06.0'
+      e.g. 'cr.seqera.io/private/nf-tower-enterprise/backend:v21.06.0'
   BackendContainerPort:
     Type: Number
     Description: (Optional) Port to open in backend container
@@ -171,9 +180,25 @@ Resources:
       LogGroupName: '/aws/ecs/task/nf-tower'
       RetentionInDays: 30
 
+  EcsTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: EcsTaskExecutionRole
+      AssumeRolePolicyDocument:
+        Version:  '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        - arn:aws:iam::aws:policy/SecretsManagerReadWrite
+
   TowerTask:
     Type: AWS::ECS::TaskDefinition
     Properties:
+      ExecutionRoleArn: !Sub 'arn:aws:iam::${AWS::AccountId}:role/EcsTaskExecutionRole'
       NetworkMode: bridge
       Volumes:
         - Name: !Ref EfsVolumeName
@@ -229,8 +254,10 @@ Resources:
               awslogs-group: !Ref TowerTaskLogGroup
               awslogs-stream-prefix: !Ref AwslogsStreamPrefix
       {%- endif %}
-        - Name: !Sub '${CronContainerName}-MigrateDb'
-          Image: !Ref CronContainerImage
+        - Name: !Ref MigrateDBContainerName
+          Image: !Ref MigrateDBContainerImage
+          RepositoryCredentials:
+            CredentialsParameter: !Sub 'arn:aws:secretsmanager:us-east-1:${AWS::AccountId}:secret:TOWER_DEV_SEQERA_REGISTRY_SECRET'
           Memory: 2000
           Cpu: 0
           Essential: false
@@ -264,6 +291,8 @@ Resources:
               awslogs-stream-prefix: !Ref AwslogsStreamPrefix
         - Name: !Ref CronContainerName
           Image: !Ref CronContainerImage
+          RepositoryCredentials:
+            CredentialsParameter: !Sub 'arn:aws:secretsmanager:us-east-1:${AWS::AccountId}:secret:TOWER_DEV_SEQERA_REGISTRY_SECRET'
           Memory: 2000
           Cpu: 0
       {%- if sceptre_user_data.EnableRedisDocker is defined and sceptre_user_data.EnableRedisDocker %}
@@ -275,7 +304,7 @@ Resources:
             - ContainerName: !Ref RedisContainerName
               Condition: START
       {%- endif %}
-            - ContainerName: !Sub '${CronContainerName}-MigrateDb'
+            - ContainerName: !Ref MigrateDBContainerName
               Condition: SUCCESS
           WorkingDirectory: /work
           EntryPoint:
@@ -305,6 +334,8 @@ Resources:
               awslogs-stream-prefix: !Ref AwslogsStreamPrefix
         - Name: !Ref FrontendContainerName
           Image: !Ref FrontendContainerImage
+          RepositoryCredentials:
+            CredentialsParameter: !Sub 'arn:aws:secretsmanager:us-east-1:${AWS::AccountId}:secret:TOWER_DEV_SEQERA_REGISTRY_SECRET'
           Memory: 2000
           Cpu: 0
           Essential: false
@@ -327,6 +358,8 @@ Resources:
           Memory: 2000
           Cpu: 0
           Image: !Ref BackendContainerImage
+          RepositoryCredentials:
+            CredentialsParameter: !Sub 'arn:aws:secretsmanager:us-east-1:${AWS::AccountId}:secret:TOWER_DEV_SEQERA_REGISTRY_SECRET'
           PortMappings:
             - ContainerPort: !Ref BackendContainerPort
               HostPort: !Ref BackendHostPort

@@ -12,7 +12,7 @@ stack_tags:
   CostCenter: NO PROGRAM / 000000 # Valid values here: https://github.com/Sage-Bionetworks/aws-infra/tree/master/templates/tags
 
 parameters:
-  S3ReadOnlyAccessArns:
+  S3ReadWriteAccessArns:
     - "{{stack_group_config.tower_viewer_arn_prefix}}/robert.allaway@sagebase.org"
     - "{{stack_group_config.tower_viewer_arn_prefix}}/jineta.banerjee@sagebase.org"
     - "{{stack_group_config.tower_viewer_arn_prefix}}/sasha.scott@sagebase.org"
