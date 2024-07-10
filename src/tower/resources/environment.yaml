@@ -28,3 +28,4 @@ TOWER_ROOT_USERS: "!If [ HasTowerRootUsers, !Join [',', !Ref TowerRootUsers], !R
 TOWER_USER_WORKSPACE_ENABLED: "!Ref 'TowerUserWorkspace'"
 TOWER_CONFIG_FILE: "!Sub '${EfsVolumeMountPath}/${TowerConfigFileName}'"
 TOWER_ALLOW_INSTANCE_CREDENTIALS: "true"
+TOWER_LOG_LEVEL: "TRACE"
