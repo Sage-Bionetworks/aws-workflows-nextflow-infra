@@ -75,6 +75,7 @@ Resources:
             - "steven_vensko@med.unc.edu"
             - "clarence@hms.harvard.edu"
             - "Jeremy_Muhlich@hms.harvard.edu"
+            - "dpozhida@systemsbiology.org"
           scm:
             providers:
               github:
